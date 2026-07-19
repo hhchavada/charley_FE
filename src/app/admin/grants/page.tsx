@@ -19,7 +19,7 @@ export default function GrantLibrary() {
   const fetchGrants = async () => {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:4002/api/admin/grants')
+      const res = await fetch('http://168.144.181.202:4002/api/admin/grants')
       const data = await res.json()
       setGrants(data)
     } catch (err) {
@@ -34,7 +34,7 @@ export default function GrantLibrary() {
     
     try {
       const newGrants = grants.filter(g => g.id !== id)
-      await fetch('http://localhost:4002/api/admin/grants', {
+      await fetch('http://168.144.181.202:4002/api/admin/grants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newGrants)
@@ -49,7 +49,7 @@ export default function GrantLibrary() {
     try {
       const newGrant = { ...grant, id: `grant_${Date.now()}`, name: `${grant.name} (Copy)` }
       const newGrants = [...grants, newGrant]
-      await fetch('http://localhost:4002/api/admin/grants', {
+      await fetch('http://168.144.181.202:4002/api/admin/grants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newGrants)

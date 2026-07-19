@@ -51,7 +51,7 @@ export default function GrantEditor() {
 
   const fetchGrants = async () => {
     try {
-      const res = await fetch('http://localhost:4002/api/admin/grants')
+      const res = await fetch('http://168.144.181.202:4002/api/admin/grants')
       const data = await res.json()
       setAllGrants(data)
       
@@ -79,7 +79,7 @@ export default function GrantEditor() {
         updatedGrants = allGrants.map(g => g.id === grant.id ? grant : g)
       }
 
-      await fetch('http://localhost:4002/api/admin/grants', {
+      await fetch('http://168.144.181.202:4002/api/admin/grants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedGrants)
