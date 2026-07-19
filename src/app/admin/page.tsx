@@ -16,8 +16,8 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         const [grantsRes, questionsRes] = await Promise.all([
-          fetch('http://localhost:3001/api/admin/grants'),
-          fetch('http://localhost:3001/api/admin/questions')
+          fetch('http://localhost:4002/api/admin/grants'),
+          fetch('http://localhost:4002/api/admin/questions')
         ]);
         
         const grants = await grantsRes.json();
