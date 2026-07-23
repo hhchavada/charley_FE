@@ -45,10 +45,17 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
         searchTimeoutRef.current = setTimeout(async () => {
           setIsSearching(true);
           try {
-            const res = await fetch(`/api/companies/search?q=${encodeURIComponent(val)}`);
+            const res = await fetch(`http://168.144.181.202:4002/api/company/search?q=${encodeURIComponent(val)}`);
             const data = await res.json();
             if (Array.isArray(data)) {
-              setSearchResults(data);
+              // Map backend response to the shape the dropdown expects
+              const mapped = data.map((d: any) => ({
+                entity_name: d.entityName,
+                uen: d.uen,
+                entity_type_description: d.entityType,
+                registration_incorporation_date: d.registrationDate || ''
+              }));
+              setSearchResults(mapped);
             } else {
               setSearchResults([]);
             }
