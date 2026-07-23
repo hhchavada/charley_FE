@@ -14,7 +14,7 @@ export default function GrantLibrary() {
   const fetchGrants = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/grants`)
+      const res = await fetch(`http://168.144.181.202:4002/api/admin/grants`)
       const data = await res.json()
       setGrants(data)
     } catch (err) {

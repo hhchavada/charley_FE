@@ -20,7 +20,7 @@ export default function ChatPage() {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4002/api"
+  const API_URL = "http://168.144.181.202:4002/api"
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })

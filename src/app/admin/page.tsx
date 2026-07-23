@@ -16,8 +16,8 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         const [grantsRes, questionsRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/grants`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/questions`)
+          fetch(`http://168.144.181.202:4002/api/admin/grants`),
+          fetch(`http://168.144.181.202:4002/api/admin/questions`)
         ]);
         
         const grants = await grantsRes.json();

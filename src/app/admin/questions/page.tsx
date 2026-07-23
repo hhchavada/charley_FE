@@ -27,7 +27,7 @@ export default function QuestionBuilder() {
   const fetchQuestions = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/questions`)
+      const res = await fetch(`http://168.144.181.202:4002/api/admin/questions`)
       const data = await res.json()
       setQuestions(data)
     } catch (err) {
@@ -45,7 +45,7 @@ export default function QuestionBuilder() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/questions`, {
+      await fetch(`http://168.144.181.202:4002/api/admin/questions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(questions)
