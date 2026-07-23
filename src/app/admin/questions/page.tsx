@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Plus, Trash2, Save, Loader2, GripVertical, Settings2 } from "lucide-react"
 
@@ -24,14 +24,10 @@ export default function QuestionBuilder() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    fetchQuestions()
-  }, [])
-
   const fetchQuestions = async () => {
     setLoading(true)
     try {
-      const res = await fetch('http://168.144.181.202:4002/api/admin/questions')
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/questions`)
       const data = await res.json()
       setQuestions(data)
     } catch (err) {
@@ -41,10 +37,15 @@ export default function QuestionBuilder() {
     }
   }
 
+  useEffect(() => {
+    // eslint-disable-next-line
+    fetchQuestions()
+  }, [])
+
   const handleSave = async () => {
     setSaving(true)
     try {
-      await fetch('http://168.144.181.202:4002/api/admin/questions', {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/questions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(questions)

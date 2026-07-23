@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { LayoutDashboard, Library, FileQuestion, Workflow, Settings, ExternalLink } from "lucide-react"
+import { LayoutDashboard, Library } from "lucide-react"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -12,14 +11,10 @@ export default function GrantLibrary() {
   const [grants, setGrants] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchGrants()
-  }, [])
-
   const fetchGrants = async () => {
     setLoading(true)
     try {
-      const res = await fetch('http://168.144.181.202:4002/api/admin/grants')
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/grants`)
       const data = await res.json()
       setGrants(data)
     } catch (err) {
@@ -29,36 +24,9 @@ export default function GrantLibrary() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this grant?")) return;
-    
-    try {
-      const newGrants = grants.filter(g => g.id !== id)
-      await fetch('http://168.144.181.202:4002/api/admin/grants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newGrants)
-      })
-      setGrants(newGrants)
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  const handleDuplicate = async (grant: any) => {
-    try {
-      const newGrant = { ...grant, id: `grant_${Date.now()}`, name: `${grant.name} (Copy)` }
-      const newGrants = [...grants, newGrant]
-      await fetch('http://168.144.181.202:4002/api/admin/grants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newGrants)
-      })
-      setGrants(newGrants)
-    } catch (err) {
-      console.error(err)
-    }
-  }
+  useEffect(() => {
+    fetchGrants()
+  }, [])
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
