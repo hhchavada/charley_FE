@@ -39,7 +39,7 @@ export interface PresentationQuestionDTO {
   options?: string[];
   validation?: Record<string, any>;
   fieldName?: string;
-  priority: number;
+  priority?: number;
   group?: string;
   section?: string;
   AIContext?: string;

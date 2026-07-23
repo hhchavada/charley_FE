@@ -223,7 +223,6 @@ export default function AssessmentPage() {
                   <div className="col-span-2">
                     <QuestionRenderer 
                       question={questions[0]} 
-                      value={formData[questions[0].fieldName]} 
                       onChange={handleChange} 
                       formData={formData}
                     />
@@ -233,7 +232,6 @@ export default function AssessmentPage() {
                       <div key={q.questionId} className={`${q.questionId === 'q_company_uen' ? 'col-span-2' : 'col-span-1'}`}>
                         <QuestionRenderer 
                           question={q} 
-                          value={formData[q.fieldName]} 
                           onChange={handleChange} 
                           formData={formData}
                         />
@@ -244,7 +242,6 @@ export default function AssessmentPage() {
                     <div key={q.questionId} className="col-span-2">
                       <QuestionRenderer 
                         question={q} 
-                        value={formData[q.fieldName]} 
                         onChange={handleChange} 
                         formData={formData}
                       />
@@ -256,7 +253,6 @@ export default function AssessmentPage() {
                   <div className="col-span-2">
                     <QuestionRenderer 
                       question={questions[7]} 
-                      value={formData[questions[7].fieldName]} 
                       onChange={handleChange} 
                       formData={formData}
                     />
@@ -265,7 +261,6 @@ export default function AssessmentPage() {
                     <div key={q.questionId} className="col-span-2">
                       <QuestionRenderer 
                         question={q} 
-                        value={formData[q.fieldName]} 
                         onChange={handleChange} 
                         formData={formData}
                       />
@@ -274,7 +269,6 @@ export default function AssessmentPage() {
                   <div className="col-span-2">
                     <QuestionRenderer 
                       question={questions[11]} 
-                      value={formData[questions[11].fieldName]} 
                       onChange={handleChange} 
                       formData={formData}
                     />

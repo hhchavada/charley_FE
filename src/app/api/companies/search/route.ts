@@ -42,10 +42,12 @@ export async function GET(request: Request) {
   // Search logic: case-insensitive partial match on entity_name
   // Limit to top 10 results
   const results = [];
-  for (const company of companies) {
-    if (company.entity_name && company.entity_name.toLowerCase().includes(normalizedQuery)) {
-      results.push(company);
-      if (results.length >= 10) break;
+  if (companies) {
+    for (const company of companies) {
+      if (company.entity_name && company.entity_name.toLowerCase().includes(normalizedQuery)) {
+        results.push(company);
+        if (results.length >= 10) break;
+      }
     }
   }
 
