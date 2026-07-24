@@ -1,4 +1,5 @@
 "use client"
+import { API_BASE } from "@/lib/api"
 
 import React, { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -17,10 +18,11 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [isTyping, setIsTyping] = useState(true)
+  const [isEvaluating, setIsEvaluating] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const API_URL = "http://168.144.181.202:4002/api"
+  const API_URL = API_BASE;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -70,7 +72,8 @@ export default function ChatPage() {
   }, [])
 
   const handleEvaluate = async (sid: string) => {
-    setIsTyping(true)
+    setIsEvaluating(true)
+    setIsTyping(false)
     try {
       const response = await fetch(`${API_URL}/v2/assessment/${sid}/evaluate`, {
         method: "POST"
@@ -81,6 +84,7 @@ export default function ChatPage() {
       router.push('/result')
     } catch (error) {
       console.error("Error evaluating:", error)
+      setIsEvaluating(false)
       setIsTyping(false)
     }
   }
@@ -224,6 +228,18 @@ export default function ChatPage() {
               <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
               <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
               <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+          </div>
+        )}
+
+        {isEvaluating && (
+          <div className="flex justify-start gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="w-8 h-8 rounded-full bg-[#1B5E45] flex items-center justify-center shrink-0 shadow-sm">
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v8l9-11h-7z" /></svg>
+            </div>
+            <div className="bg-white border border-neutral-200 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-3 h-10">
+              <Loader2 className="w-4 h-4 animate-spin text-[#1B5E45]" />
+              <span className="text-sm text-neutral-600 font-medium">Generating recommendations...</span>
             </div>
           </div>
         )}

@@ -1,4 +1,5 @@
 "use client"
+import { API_BASE } from "@/lib/api"
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
@@ -51,7 +52,7 @@ export default function GrantEditor() {
 
   const fetchGrants = async () => {
     try {
-      const res = await fetch(`http://168.144.181.202:4002/api/admin/grants`)
+      const res = await fetch(`${API_BASE}/admin/grants`)
       const data = await res.json()
       setAllGrants(data)
       
@@ -79,7 +80,7 @@ export default function GrantEditor() {
         updatedGrants = allGrants.map(g => g.id === grant.id ? grant : g)
       }
 
-      await fetch(`http://168.144.181.202:4002/api/admin/grants`, {
+      await fetch(`${API_BASE}/admin/grants`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedGrants)

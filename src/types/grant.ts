@@ -17,6 +17,7 @@ export interface RecommendationDTO {
   headline?: string;
   subHeadline?: string;
   typicalFunding?: string;
+  maximumFunding?: string;
   supportPercentage?: string;
   processingTime?: string;
   confidence: number;

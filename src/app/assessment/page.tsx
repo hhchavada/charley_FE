@@ -19,11 +19,11 @@ export default function AssessmentPage() {
     monthlyRevenue: "",
     retainedEarnings: "",
     desiredFundingAmount: "",
-    purpose: "",
+    purpose: [],
     contactName: "",
     contactEmail: "",
     contactPhone: "",
-    purposeOfFunds: []
+    purposeOfFunds: ["Growth"]
   })
 
   const questions: QuestionDef[] = [
@@ -83,22 +83,19 @@ export default function AssessmentPage() {
     },
     {
       questionId: "q_purpose",
-      title: "Primary Business Goal",
-      type: "multidropdown",
+      title: "Primary Business Goals",
+      description: "Select all that apply",
+      type: "multiselect",
       validation: { required: true },
       fieldName: "purpose",
       options: [
-        "Business Growth",
-        "Finding Skilled Employees",
-        "Digital Transformation",
-        "Technology Adoption",
-        "Developing New Products",
-        "Entering New Markets",
-        "High Operating Costs",
-        "Sustainability",
-        "Improving Productivity",
-        "Other"
-      ]
+        { id: "Business Growth", label: "Business Growth (EDG, PSG)" },
+        { id: "Entering New Markets", label: "Overseas Expansion (MRA, EDG)" },
+        { id: "Developing New Products", label: "Developing New Products (EIS, EDG)" },
+        { id: "Finding Skilled Employees", label: "Hiring & Training (CCP, CTC)" },
+        { id: "Digital Transformation", label: "Digital Transformation (PSG, WDG)" },
+        { id: "Sustainability", label: "Energy Efficiency (EEG)" }
+      ] as any // as any because QuestionDef expects string[] or we just use strings if QuestionRenderer supports objects
     },
     {
       questionId: "q_contact_name",
@@ -123,18 +120,6 @@ export default function AssessmentPage() {
       placeholder: "Enter your phone number",
       validation: { required: true },
       fieldName: "contactPhone"
-    },
-    {
-      questionId: "q_purpose_of_funds",
-      title: "Purpose of funds",
-      description: "Select all that apply",
-      type: "multiselect",
-      validation: { required: true },
-      fieldName: "purposeOfFunds",
-      options: [
-        "Equipment", "Inventory", "Working Capital", "Growth",
-        "Cashflow", "Pay off debt", "Renovation", "Other"
-      ]
     }
   ]
 
@@ -143,9 +128,11 @@ export default function AssessmentPage() {
   }
 
   const isStep1Valid = !!formData.companyName && !!formData.monthlyRevenue && !!formData.retainedEarnings && !!formData.desiredFundingAmount;
-  const isStep2Valid = !!formData.purpose && !!formData.contactName && !!formData.contactEmail && !!formData.contactPhone && formData.purposeOfFunds.length > 0;
+  const isStep2Valid = !!formData.contactName && !!formData.contactEmail && !!formData.contactPhone;
+  const isStep3Valid = formData.purpose && formData.purpose.length > 0;
 
   const handleSubmit = async () => {
+    setAnalyzing(true);
     localStorage.setItem("assessmentInitialData", JSON.stringify(formData));
     router.push('/assessment/chat');
   }
@@ -188,7 +175,9 @@ export default function AssessmentPage() {
             <p className="text-[15px] leading-relaxed text-neutral-600 max-w-[36ch] mb-8">
               {step === 1 
                 ? "We'll start by verifying your company details. After that, our AI consultant will ask a few personalised questions to identify the government grants that best match your business."
-                : "We've securely verified your registered business information. Review the details below and tell us how you'd like to use the funding."}
+                : step === 2 
+                ? "Please provide your contact information so we can reach out with the assessment results."
+                : "Select the primary goals for your business. You can choose multiple goals to discover relevant grants."}
             </p>
 
             <div className="space-y-4">
@@ -213,12 +202,14 @@ export default function AssessmentPage() {
           <div className="bg-white rounded-[24px] shadow-sm border border-neutral-100 p-6 md:p-8 relative z-10 animate-in fade-in slide-in-from-right-4 duration-700 ease-out fill-mode-both">
             
             <div className="flex items-center justify-between mb-8">
-              <div className="text-sm font-semibold text-[#1B5E45]">Step {step} of 2</div>
-              <div className="text-sm font-medium text-neutral-400">{step === 1 ? 'Business details' : 'Contact details'}</div>
+              <div className="text-sm font-semibold text-[#1B5E45]">Step {step} of 3</div>
+              <div className="text-sm font-medium text-neutral-400">
+                {step === 1 ? 'Business details' : step === 2 ? 'Contact details' : 'Business goals'}
+              </div>
             </div>
 
             <div className="space-y-6">
-              {step === 1 ? (
+              {step === 1 && (
                 <>
                   <div className="col-span-2">
                     <QuestionRenderer 
@@ -248,15 +239,10 @@ export default function AssessmentPage() {
                     </div>
                   ))}
                 </>
-              ) : (
+              )}
+              
+              {step === 2 && (
                 <>
-                  <div className="col-span-2">
-                    <QuestionRenderer 
-                      question={questions[7]} 
-                      onChange={handleChange} 
-                      formData={formData}
-                    />
-                  </div>
                   {questions.slice(8, 11).map((q, idx) => (
                     <div key={q.questionId} className="col-span-2">
                       <QuestionRenderer 
@@ -266,9 +252,14 @@ export default function AssessmentPage() {
                       />
                     </div>
                   ))}
+                </>
+              )}
+
+              {step === 3 && (
+                <>
                   <div className="col-span-2">
                     <QuestionRenderer 
-                      question={questions[11]} 
+                      question={questions[7]} 
                       onChange={handleChange} 
                       formData={formData}
                     />
@@ -286,7 +277,7 @@ export default function AssessmentPage() {
                 >
                   Continue
                 </Button>
-              ) : (
+              ) : step === 2 ? (
                 <div className="flex gap-3">
                   <Button 
                     variant="outline"
@@ -296,8 +287,25 @@ export default function AssessmentPage() {
                     Back
                   </Button>
                   <Button 
+                    onClick={() => setStep(3)} 
+                    disabled={!isStep2Valid}
+                    className="w-2/3 bg-[#1B5E45] hover:bg-[#0F4433] text-white rounded-lg h-12 text-[15px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setStep(2)} 
+                    className="w-1/3 bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50 rounded-lg h-12 text-[15px] font-semibold transition-colors"
+                  >
+                    Back
+                  </Button>
+                  <Button 
                     onClick={handleSubmit} 
-                    disabled={!isStep2Valid || analyzing}
+                    disabled={!isStep3Valid || analyzing}
                     className="w-2/3 bg-[#1B5E45] hover:bg-[#0F4433] text-white rounded-lg h-12 text-[15px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {analyzing ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "See your match"}

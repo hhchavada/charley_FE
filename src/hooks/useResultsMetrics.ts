@@ -3,7 +3,8 @@ import { AssessmentResultDTO, RecommendationDTO } from '@/types/grant'
 
 export function useResultsMetrics(results: AssessmentResultDTO["recommendations"] | null, summary: AssessmentResultDTO["summary"] | null) {
   const totalFundingNum = summary?.estimatedFunding || 0;
-  const totalFunding = summary?.fundingRange || (totalFundingNum > 0 ? `$${totalFundingNum.toLocaleString()}` : 'TBD');
+  const displayFundingNum = totalFundingNum > 0 && totalFundingNum < 1000 ? totalFundingNum * 1000 : totalFundingNum;
+  const totalFunding = summary?.fundingRange || (displayFundingNum > 0 ? `$${displayFundingNum.toLocaleString()}` : 'TBD');
 
   const missingFields = useMemo(() => {
     // We no longer have ruleResults available from the backend for missing fields,

@@ -21,18 +21,21 @@ export default function ResultPage() {
   const [timestamp, setTimestamp] = useState("")
 
   useEffect(() => {
-    const data = localStorage.getItem("grantResults")
+    const data = localStorage.getItem("assessmentResult")
     if (data) {
-      const parsed: AssessmentResultDTO = JSON.parse(data)
-      const sortFn = (a: RecommendationDTO, b: RecommendationDTO) => b.recommendationScore - a.recommendationScore
-      setResults({
-        readyNow: (parsed.recommendations?.readyNow || []).sort(sortFn),
-        needsInformation: (parsed.recommendations?.needsInformation || []).sort(sortFn),
-        prepareNext: (parsed.recommendations?.prepareNext || []).sort(sortFn),
-        windowClosed: (parsed.recommendations?.windowClosed || []).sort(sortFn),
-        hidden: (parsed.recommendations?.hidden || []).sort(sortFn)
-      })
-      setSummary(parsed.summary)
+      const parsed = JSON.parse(data)
+      const evaluation = parsed.evaluation
+      if (evaluation) {
+        const sortFn = (a: RecommendationDTO, b: RecommendationDTO) => b.recommendationScore - a.recommendationScore
+        setResults({
+          readyNow: (evaluation.recommendations?.readyNow || []).sort(sortFn),
+          needsInformation: (evaluation.recommendations?.needsInformation || []).sort(sortFn),
+          prepareNext: (evaluation.recommendations?.prepareNext || []).sort(sortFn),
+          windowClosed: (evaluation.recommendations?.windowClosed || []).sort(sortFn),
+          hidden: (evaluation.recommendations?.hidden || []).sort(sortFn)
+        })
+        setSummary(evaluation.summary)
+      }
     }
     setTimestamp(new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }))
   }, [])

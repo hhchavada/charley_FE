@@ -1,4 +1,5 @@
 "use client"
+import { API_BASE } from "@/lib/api"
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -27,7 +28,7 @@ export default function QuestionBuilder() {
   const fetchQuestions = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`http://168.144.181.202:4002/api/admin/questions`)
+      const res = await fetch(`${API_BASE}/admin/questions`)
       const data = await res.json()
       setQuestions(data)
     } catch (err) {
@@ -45,7 +46,7 @@ export default function QuestionBuilder() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await fetch(`http://168.144.181.202:4002/api/admin/questions`, {
+      await fetch(`${API_BASE}/admin/questions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(questions)

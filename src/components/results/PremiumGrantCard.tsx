@@ -5,6 +5,25 @@ import { CheckCircle2, AlertCircle, XCircle, ChevronDown, ChevronUp, Zap } from 
 import { ConsultantAnalysisCard } from '@/components/results/ConsultantAnalysisCard'
 import { RecommendationDTO } from '@/types/grant'
 
+const formatMoney = (val?: string | number) => {
+  if (!val && val !== 0) return 'Variable'
+  const str = String(val).trim()
+  
+  if (/^\d+$/.test(str)) {
+    const num = Number(str)
+    if (num < 1000) {
+      return `$${num},000`
+    }
+    return `$${num.toLocaleString()}`
+  }
+  
+  if (/^\d{1,3}(,\d{3})*$/.test(str)) {
+    return `$${str}`
+  }
+  
+  return str
+}
+
 export const PremiumGrantCard = React.memo(function PremiumGrantCard({ 
   match, 
   type, 
@@ -58,11 +77,7 @@ export const PremiumGrantCard = React.memo(function PremiumGrantCard({
             {activeConfig.icon}
             {activeConfig.status}
           </Badge>
-          {!isError && (
-            <Badge variant="outline" className="text-[10px] font-bold text-slate-400 bg-white shadow-sm border-slate-200 rounded-full px-2.5 py-0.5 uppercase tracking-wider">
-              Priority {(100 - match.recommendationScore).toFixed(0)}
-            </Badge>
-          )}
+          {/* Priority badge removed for production */}
         </div>
 
         <div className="space-y-2 w-full">
@@ -78,24 +93,42 @@ export const PremiumGrantCard = React.memo(function PremiumGrantCard({
       </CardHeader>
 
       <CardContent className="pt-6 flex-grow flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-          <div className="flex-1 flex items-center justify-between bg-slate-50/80 rounded-2xl p-5 border border-slate-100">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Typical Funding</p>
-              <p className={`text-2xl sm:text-3xl font-black ${isError ? 'text-slate-400' : 'text-slate-900'}`}>
-                {isError ? '$0' : (match.typicalFunding || 'Variable')}
-              </p>
-            </div>
-            {match.supportPercentage && !isError && (
-              <div className="text-right flex flex-col items-end">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Coverage</p>
-                <Badge variant="secondary" className="bg-blue-50 text-blue-700 font-black text-sm border-blue-100 px-3 py-1">
-                  {match.supportPercentage}
-                </Badge>
-              </div>
-            )}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+          <div className="flex flex-col justify-center bg-slate-50/80 rounded-2xl p-4 border border-slate-100">
+            <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Typical Funding</p>
+            <p className={`text-lg sm:text-xl font-black ${isError ? 'text-slate-400' : 'text-slate-900'}`}>
+              {isError ? '$0' : formatMoney(match.typicalFunding)}
+            </p>
           </div>
           
+          <div className="flex flex-col justify-center bg-slate-50/80 rounded-2xl p-4 border border-slate-100">
+            <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Max Funding</p>
+            <p className={`text-lg sm:text-xl font-black ${isError ? 'text-slate-400' : 'text-slate-900'}`}>
+              {isError ? '$0' : formatMoney(match.maximumFunding)}
+            </p>
+          </div>
+
+          <div className="flex flex-col justify-center bg-slate-50/80 rounded-2xl p-4 border border-slate-100">
+            <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Support %</p>
+            <div>
+              {isError ? (
+                <span className="text-slate-400 font-bold">-</span>
+              ) : match.supportPercentage ? (
+                <Badge variant="secondary" className="bg-blue-50 text-blue-700 font-black text-sm border-blue-100 px-2 py-0.5">
+                  {match.supportPercentage}
+                </Badge>
+              ) : (
+                <span className="text-slate-600 font-bold">Varies</span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center bg-slate-50/80 rounded-2xl p-4 border border-slate-100">
+            <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Processing Time</p>
+            <p className={`text-sm sm:text-base font-bold ${isError ? 'text-slate-400' : 'text-slate-700'}`}>
+              {isError ? '-' : (match.processingTime || 'Varies')}
+            </p>
+          </div>
         </div>
 
         <button 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Truck, Package, TrendingUp, Banknote, ReceiptText, Store, Briefcase, MoreHorizontal } from "lucide-react";
+import { Truck, Package, TrendingUp, Banknote, ReceiptText, Store, Briefcase, MoreHorizontal, Users, Laptop, Cpu, Lightbulb, Globe, TrendingDown, Leaf, Zap } from "lucide-react";
 import { PresentationQuestionDTO as QuestionDef } from "@/types/grant";
 import { QuestionEngine } from "../lib/QuestionEngine";
 
@@ -45,17 +45,10 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
         searchTimeoutRef.current = setTimeout(async () => {
           setIsSearching(true);
           try {
-            const res = await fetch(`http://168.144.181.202:4002/api/company/search?q=${encodeURIComponent(val)}`);
+            const res = await fetch(`/api/companies/search?q=${encodeURIComponent(val)}`);
             const data = await res.json();
             if (Array.isArray(data)) {
-              // Map backend response to the shape the dropdown expects
-              const mapped = data.map((d: any) => ({
-                entity_name: d.entityName,
-                uen: d.uen,
-                entity_type_description: d.entityType,
-                registration_incorporation_date: d.registrationDate || ''
-              }));
-              setSearchResults(mapped);
+              setSearchResults(data);
             } else {
               setSearchResults([]);
             }
@@ -98,10 +91,20 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
                   <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4 z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                )}
               <input 
-                type={question.type === 'number' || question.type === 'currency' ? 'number' : 'text'}
+                type={question.type === 'number' ? 'number' : 'text'}
                 placeholder={question.placeholder} 
-                value={(value as unknown as string | number) || ""} 
-                onChange={(e) => handleChange(e.target.value)}
+                value={isCurrency && value ? Number(String(value).replace(/,/g, '')).toLocaleString() : ((value as unknown as string | number) || "")} 
+                onChange={(e) => {
+                  let val = e.target.value;
+                  if (isCurrency) {
+                    val = val.replace(/,/g, '');
+                    if (val === '' || /^\d+$/.test(val)) {
+                       handleChange(val ? Number(val) : '');
+                    }
+                  } else {
+                    handleChange(val);
+                  }
+                }}
                 required={question.validation?.required}
                 min={question.validation?.min}
                 max={question.validation?.max}
@@ -242,13 +245,19 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
               className="flex items-center justify-between w-full h-11 px-3 bg-white text-sm rounded-lg border border-neutral-200 focus:outline-none focus:ring-4 focus:ring-forest/15 transition-all duration-300"
             >
               <span className={selectedArray.length === 0 ? "text-neutral-500" : "text-neutral-900 truncate pr-4"}>
-                {selectedArray.length === 0 ? (question.placeholder || "Select options...") : selectedArray.join(", ")}
+                {selectedArray.length === 0 ? (question.placeholder || "Select options...") : 
+                  selectedArray.map((val: string) => {
+                    const optObj = question.options?.find(o => typeof o === 'object' && o !== null && (o as any).id === val);
+                    return optObj ? (optObj as any).label : val;
+                  }).join(", ")}
               </span>
               <svg className="w-4 h-4 text-neutral-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </button>
             {showDropdown && (
               <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white border border-neutral-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto p-1">
-                {question.options?.map(opt => {
+                {question.options?.map(optRaw => {
+                  const opt = typeof optRaw === 'object' && optRaw !== null ? (optRaw as any).id : optRaw;
+                  const label = typeof optRaw === 'object' && optRaw !== null ? (optRaw as any).label : optRaw;
                   const isSelected = selectedArray.includes(opt);
                   return (
                     <label
@@ -266,7 +275,7 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
                       <div className={`w-4 h-4 shrink-0 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-forest border-forest' : 'border-neutral-300 bg-white'}`}>
                         {isSelected && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                       </div>
-                      <span className={`text-sm ${isSelected ? 'font-medium text-neutral-900' : 'text-neutral-700'}`}>{opt}</span>
+                      <span className={`text-sm ${isSelected ? 'font-medium text-neutral-900' : 'text-neutral-700'}`}>{label}</span>
                     </label>
                   );
                 })}
@@ -279,7 +288,9 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
       case 'radio':
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup" aria-labelledby={`label-${question.questionId}`}>
-            {question.options?.map(opt => {
+            {question.options?.map(optRaw => {
+              const opt = typeof optRaw === 'object' && optRaw !== null ? (optRaw as any).id : optRaw;
+              const label = typeof optRaw === 'object' && optRaw !== null ? (optRaw as any).label : optRaw;
               const isSelected = (value as unknown) === opt;
               return (
                 <button
@@ -295,11 +306,13 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
                   }`}
                 >
                   <div className="flex items-start justify-between w-full">
-                    <span className={`text-sm font-semibold transition-colors duration-200 ${isSelected ? 'text-blue-900' : 'text-slate-700 group-hover:text-slate-900'}`}>{opt}</span>
-                    <div className={`mt-0.5 shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-colors duration-200 ${
-                      isSelected ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-slate-50 group-hover:border-slate-400'
+                    <span className={`text-sm font-medium leading-5 ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>
+                      {label}
+                    </span>
+                    <div className={`mt-0.5 ml-3 flex-shrink-0 w-4 h-4 rounded-full border-2 transition-colors duration-200 flex items-center justify-center ${
+                      isSelected ? 'border-blue-600' : 'border-slate-300 group-hover:border-slate-400'
                     }`}>
-                      {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white animate-in zoom-in duration-200" />}
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-blue-600" />}
                     </div>
                   </div>
                 </button>
@@ -311,24 +324,28 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
       case 'multiselect':
       case 'checkbox':
         const selectedArray = Array.isArray(value) ? value : [];
-        const isPurpose = question.questionId === 'q_purpose_of_funds';
+        const isPurpose = question.questionId === 'q_purpose_of_funds' || question.questionId === 'q_purpose';
         
         const getPurposeIcon = (opt: string) => {
           switch (opt) {
-            case 'Equipment': return <Truck className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
-            case 'Inventory': return <Package className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
-            case 'Working Capital': return <Briefcase className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
-            case 'Growth': return <TrendingUp className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
-            case 'Cashflow': return <Banknote className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
-            case 'Pay off debt': return <ReceiptText className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
-            case 'Renovation': return <Store className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'Business Growth': return <TrendingUp className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'Finding Skilled Employees': return <Users className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'Digital Transformation': return <Laptop className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'Technology Adoption': return <Cpu className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'Developing New Products': return <Lightbulb className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'Entering New Markets': return <Globe className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'High Operating Costs': return <TrendingDown className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'Sustainability': return <Leaf className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
+            case 'Improving Productivity': return <Zap className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
             default: return <MoreHorizontal className="w-4 h-4 mb-1.5 text-neutral-500 group-hover:text-[#1B5E45] transition-colors" />;
           }
         };
 
         return (
           <div className={`grid ${isPurpose ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'} gap-2.5`} role="group" aria-labelledby={`label-${question.questionId}`}>
-            {question.options?.map(opt => {
+            {question.options?.map(optRaw => {
+              const opt = typeof optRaw === 'object' && optRaw !== null ? (optRaw as any).id : optRaw;
+              const label = typeof optRaw === 'object' && optRaw !== null ? (optRaw as any).label : optRaw;
               const isSelected = selectedArray.includes(opt);
               return (
                 <button
@@ -358,7 +375,7 @@ export const QuestionRenderer = React.memo(function QuestionRenderer({ question,
                   )}
                   {isPurpose && getPurposeIcon(opt)}
                   <div className={`flex items-center justify-between w-full ${isPurpose ? 'justify-center' : ''}`}>
-                    <span className={`font-semibold transition-colors duration-200 ${isSelected ? 'text-[#1B5E45]' : 'text-slate-700 group-hover:text-slate-900'} ${isPurpose ? 'text-[12px] leading-tight px-1' : 'text-sm leading-snug'}`}>{opt}</span>
+                    <span className={`font-semibold transition-colors duration-200 ${isSelected ? 'text-[#1B5E45]' : 'text-slate-700 group-hover:text-slate-900'} ${isPurpose ? 'text-[12px] leading-tight px-1' : 'text-sm leading-snug'}`}>{label}</span>
                     {!isPurpose && (
                       <div className={`mt-0.5 ml-3 shrink-0 w-4 h-4 rounded-[0.2rem] border flex items-center justify-center transition-colors duration-200 ${
                         isSelected ? 'border-[#1B5E45] bg-[#1B5E45]' : 'border-slate-300 bg-slate-50 group-hover:border-slate-400'

@@ -1,4 +1,5 @@
 "use client"
+import { API_BASE } from "@/lib/api"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,8 +17,8 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         const [grantsRes, questionsRes] = await Promise.all([
-          fetch(`http://168.144.181.202:4002/api/admin/grants`),
-          fetch(`http://168.144.181.202:4002/api/admin/questions`)
+          fetch(`${API_BASE}/admin/grants`),
+          fetch(`${API_BASE}/admin/questions`)
         ]);
         
         const grants = await grantsRes.json();
