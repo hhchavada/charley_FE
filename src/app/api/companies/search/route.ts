@@ -11,13 +11,25 @@ function loadCompanies() {
   try {
     // Determine the path to the backend JSON file
     // process.cwd() will be the frontend root directory
-    const jsonPath = path.join(process.cwd(), '../backend/src/data/acra/corporate-entities.json');
+    // Check multiple possible paths to support both local and live server folder structures
+    const possiblePaths = [
+      path.join(process.cwd(), '../backend/src/data/acra/corporate-entities.json'),
+      path.join(process.cwd(), '../charley_BE/src/data/acra/corporate-entities.json')
+    ];
+
+    let foundPath = null;
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        foundPath = p;
+        break;
+      }
+    }
     
-    if (fs.existsSync(jsonPath)) {
-      const data = fs.readFileSync(jsonPath, 'utf8');
+    if (foundPath) {
+      const data = fs.readFileSync(foundPath, 'utf8');
       cachedCompanies = JSON.parse(data);
     } else {
-      console.warn(`ACRA JSON dataset not found at ${jsonPath}`);
+      console.warn(`ACRA JSON dataset not found in any expected location.`);
       cachedCompanies = [];
     }
   } catch (error) {
